@@ -43,6 +43,8 @@ public:
           return this->scene_;
    }
 
+    int get_froce_pmt_dl_flag();
+
     DECLARE_TABWIDGET_VFUNCS()
 
     virtual void onPlatformChanged();
@@ -150,6 +152,7 @@ private slots:
     void on_toolButton_Certification_clicked();
     void on_tableWidget_itemChanged(QTableWidgetItem *item);
     void on_checkbox_set_boot_mode_to_meta_clicked();
+    void on_skipShowOK_CheckBox_stateChanged(int state);
 };
 
 #endif // DOWNLOADWIDGET_H

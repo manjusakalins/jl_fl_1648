@@ -130,7 +130,6 @@ private slots:
 
     void on_comboBox_Language_activated(int index);
 
-    void on_pushButton_browser_clicked();
 
     void on_comboBoxTheme_currentIndexChanged(int index);
 

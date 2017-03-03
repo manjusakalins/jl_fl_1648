@@ -217,6 +217,12 @@ SOURCES += \
     Cmd/DLWithoutScatterCommand.cpp \
     Setting/ReadbackWithoutScatterSetting.cpp \
     Cmd/ReadbackWithoutScatterCommand.cpp \
+    UI/src/hexedit_src/qhexedit.cpp \
+    UI/src/hexedit_src/chunks.cpp \
+    UI/src/hexedit_src/commands.cpp \
+    Cmd/JlinkComboCustFormatCommand.cpp \
+    Setting/JlinkComboCustFormatSetting.cpp \
+    UI/src/JlinkParameterWidget.cpp \
     Setting/SetBootModeSetting.cpp \
     Cmd/SetBootModeCommand.cpp
 
@@ -422,6 +428,12 @@ HEADERS += \
     BootRom/common_struct.h \
     Setting/ReadbackWithoutScatterSetting.h \
     Cmd/ReadbackWithoutScatterCommand.h \
+    UI/src/hexedit_src/qhexedit.h \
+    UI/src/hexedit_src/chunks.h \
+    UI/src/hexedit_src/commands.h \
+    Cmd/JlinkComboCustFormatCommand.h \
+    Setting/JlinkComboCustFormatSetting.h \
+    UI/src/JlinkParameterWidget.h \
     Setting/SetBootModeSetting.h \
     Cmd/SetBootModeCommand.h
 
@@ -461,6 +473,7 @@ FORMS += \
     UI/forms/TabWidget/SCIDownloadWidget.ui \
     UI/forms/TabWidget/CloneDownloadWidget.ui \
     UI/forms/EncryDialog.ui \
+    UI/forms/TabWidget/JlinkParameterWidget.ui \
     UI/forms/UfsWidget.ui
 
 

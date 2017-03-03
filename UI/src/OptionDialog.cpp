@@ -933,11 +933,6 @@ void OptionDialog::SetLabelText(int index)
     ui->comboBox_Language->setCurrentIndex(index);
 }
 
-void OptionDialog::on_pushButton_browser_clicked()
-{
-
-}
-
 void OptionDialog::on_checkBox_ShowWelcome_clicked()
 {
     IniItem item("option.ini", "WelcomePage", "ShowWelcome");

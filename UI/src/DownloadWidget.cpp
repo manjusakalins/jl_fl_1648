@@ -226,6 +226,11 @@ void DownloadWidget::on_pushButton_download_clicked()
 
     if(ValidateBeforeDownload())
     {
+    	if (ui_->loopDL_CheckBox->isChecked() && ui_->skipShowOK_CheckBox->isChecked()){
+			main_window_->setIsAutoPollingEnable(1);
+			main_window_->setAutoPollingUpperLimit(1000);
+		} else
+			main_window_->setIsAutoPollingEnable(0);
         StartDownload();
         main_window_->LockOnUI();
         main_window_->GetOkDialog()->setWindowTitle(LoadQString(LANGUAGE_TAG, IDS_STRING_DOWNLOAD_OK));
@@ -1308,4 +1313,15 @@ void DownloadWidget::on_checkbox_set_boot_mode_to_meta_clicked()
         EnableBootMode_ComType(false);
         EnableBootMode_ComId(false);
     }
+}
+
+int DownloadWidget::get_froce_pmt_dl_flag(void)
+{
+	return ui_->forceDownPmt_CheckBox->isChecked();
+}
+
+void DownloadWidget::on_skipShowOK_CheckBox_stateChanged(int state)
+{
+	LOGI("########## %s %d ##########: state: %d\n", __func__, __LINE__, state);
+	main_window_->SetSkipOkFlag(state);
 }

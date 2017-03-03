@@ -35,6 +35,7 @@
 #include "PlatformObj.h"
 #include "OptionDialog.h"
 #include "OkDialog.h"
+#include "../../Setting/JlinkComboCustFormatSetting.h"
 
 
 namespace Ui
@@ -70,6 +71,7 @@ class UfsWidget;
 class SCIDownloadWidget;
 class CloneDownloadWidget;
 class EncryDialog;
+class JlinkParameterWidget;
 
 typedef enum
 {
@@ -149,6 +151,7 @@ public:
     MainController *main_controller() const{ return main_controller_; }
     ProcessingDialog *processing_dialog() const{ return processing_dialog_; }
     MainWindowCallback *main_callbacks() const{ return main_callbacks_; }
+    DownloadWidget *get_DLWidget() const { return download_widget;}
 
     QSharedPointer<ConsoleMode::GeneralSetting> CreateGeneralSetting();
     QSharedPointer<APCore::ConnSetting> CreateConnSetting();
@@ -177,6 +180,9 @@ public:
     QSharedPointer<APCore::BromAdapterSetting> CreateBromAdapterSetting(bool only_jump = false);
     QSharedPointer<APCore::SCIDownloadSetting> CreateSCIDownloadSetting();
     QSharedPointer<APCore::ChksumSetting> CreateChksumSetting();
+    QSharedPointer<APCore::ReadbackSetting> CreateJlinkParamReadbackSetting();
+    QSharedPointer<APCore::WriteMemorySetting> CreateJlinkParamWriteMemorySetting();
+    QSharedPointer<APCore::JlinkComboCustFormatSetting> CreateJlinkComboCustFormatSetting(DL_SCATTER_TYPE type = NORMAL_SCATTER);
 
     void LockOnUI(); //called in UI thread
     void DoFinished(); //called in any thread
@@ -254,6 +260,12 @@ public:
 
     void SetUARTBaudrateIndex(unsigned int index);
 
+    void SetSkipOkFlag(int state)
+    {
+        skip_ok = state;
+    }
+    int GetSkipOkFlag(void)
+    {return skip_ok;}
 private:
     Ui::MainWindow *ui;
     MainController *main_controller_;
@@ -270,6 +282,7 @@ private:
     BromAdapterWidget* bromAdapter_widget;
     SCIDownloadWidget* sciDownload_widget_;
     CloneDownloadWidget* cloneDownload_wdiget_;
+    JlinkParameterWidget* jlinkParameter_widget;
     std::list<TabWidgetBase*> tab_widgets;
 
     ChipInfoWidget* info_widget_;
@@ -317,6 +330,7 @@ private:
     bool is_ok_;
     bool is_scidl_visible_;
     QTimer* thread_timer_;
+    int skip_ok;
 
 
     //For send error report

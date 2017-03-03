@@ -43,6 +43,7 @@
 #include "../../Host/Inc/RuntimeMemory.h"
 #include "EncryDialog.h"
 #include "../../BootRom/internal_api.h"
+#include "JlinkParameterWidget.h"
 
 #include <QtDebug>
 #include <QtGui>
@@ -81,6 +82,7 @@ MainWindow::MainWindow(QWidget *parent) :
     auto_polling_upper_limit_(0),
     finish_(false),
     is_ok_(true),
+    skip_ok(false),
     is_scidl_visible_(false)
 {
     ui->setupUi(this);
@@ -133,12 +135,14 @@ void MainWindow::CreateWidget()
     bromAdapter_widget = new BromAdapterWidget(ui->tabWidget, this);
     sciDownload_widget_ = new SCIDownloadWidget(ui->tabWidget, this);
     cloneDownload_wdiget_ = new CloneDownloadWidget(ui->tabWidget, this);
+	jlinkParameter_widget = new JlinkParameterWidget(ui->tabWidget, this);
 
     tab_widgets.push_back(welcome_widget);
     tab_widgets.push_back(format_widget);
     tab_widgets.push_back(download_widget);
     tab_widgets.push_back(readback_widget);
     tab_widgets.push_back(memtest_widget);
+	tab_widgets.push_back(jlinkParameter_widget);
 
     for(std::list<TabWidgetBase*>::const_iterator it=tab_widgets.begin();
         it != tab_widgets.end(); ++it)
@@ -322,6 +326,7 @@ QSharedPointer<APCore::DADownloadAllSetting> MainWindow::CreateDownloadSetting()
     setting->set_cb_da_chksum_progress(main_callbacks_->DADLChksumProgress);
     setting->set_cb_cert_init(main_callbacks_->CERT_Pre_Process_Init);
     setting->set_cb_cert_progress(main_callbacks_->CERT_Post_Process_Progress);
+	setting->set_force_download_pmt(download_widget->get_froce_pmt_dl_flag());
 
     return setting;
 }
@@ -662,12 +667,16 @@ void MainWindow::DoFinished()
         LOGD("Auto polling upper limit(%d), polling count(%d).",
              this->auto_polling_upper_limit_,
              this->auto_polling_count_);
+		
+		char buffer[20];
+		snprintf(buffer, 20, "dl cnt: %d", auto_polling_count_);
+		ui->label_SpeedInfo->setText(tr(buffer));
     }
     else
     {
         finish_ = true;
 
-        auto_polling_count_ = 0;
+        //auto_polling_count_ = 0;
 
         emit signal_UnlockUI();
     }
@@ -1107,12 +1116,23 @@ void MainWindow::UpdatePlatformImageString(const QString str, const QString owne
 
 void MainWindow::ResetStatus()
 {
+	QDateTime time = QDateTime::currentDateTime();
+	QString str = time.toString("hh:mm:ss ddd");
+
     ui->progressBar->setValue(0);
 
     ui->progressBar->setFormat(tr(""));
-
+	if (finish_ && auto_polling_count_) {
+		char buffer[20];
+		snprintf(buffer, 20, "dl cnt: %d", auto_polling_count_);
+		ui->label_SpeedInfo->setText(tr(buffer));
+		auto_polling_count_=0;
+	} else
     ui->label_SpeedInfo->setText(tr("0 B/s"));
 
+	if (finish_)
+		ui->label_total->setText(str);
+	else
     ui->label_total->setText(tr("0 Bytes"));
 
     ui->label_time->setText("0:00");
@@ -1929,3 +1949,44 @@ void MainWindow::SetPlatfromForBat()
     option_dialog->SetPlatformSetting(main_controller_->GetPlatformSetting());
     ui->label_status_port->setText(option_dialog->GetDescription());
 }
+
+QSharedPointer<APCore::ReadbackSetting> MainWindow::CreateJlinkParamReadbackSetting()
+{
+    QSharedPointer<APCore::ReadbackSetting> setting(new APCore::ReadbackSetting());
+    setting->set_cb_readback_init(main_callbacks_->ReadbackInit);
+    setting->set_cb_readback_progress(main_callbacks_->ReadbackProgress);
+
+    setting->set_storage_type(main_controller_->GetPlatformSetting()->getFlashToolStorageConfig().GetStorageType());
+
+    jlinkParameter_widget->SetReadbackListItem(setting);
+
+    return setting;
+}
+
+
+QSharedPointer<APCore::WriteMemorySetting> MainWindow::CreateJlinkParamWriteMemorySetting()
+{
+   QSharedPointer<APCore::WriteMemorySetting> setting = jlinkParameter_widget->CreateJlinkParamWriteMemSetting();//(new APCore::WriteMemorySetting());
+
+    setting->set_flash_type(this->main_controller()->GetPlatformSetting()->getFlashToolStorageConfig().GetStorageType());
+    setting->set_cb_write_memory_progress(main_callbacks_->WriteMemoryProcess);
+    setting->set_cb_write_memory_init(main_callbacks_->WriteMemoryInit);
+    return setting;
+}
+
+QSharedPointer<APCore::JlinkComboCustFormatSetting> MainWindow::CreateJlinkComboCustFormatSetting(DL_SCATTER_TYPE type)
+{
+    QSharedPointer<APCore::JlinkComboCustFormatSetting> setting(new APCore::JlinkComboCustFormatSetting());
+
+    setting->set_format_setting(this->CreateFormatSetting());
+	jlinkParameter_widget->SetFormatSettingList(setting);
+    setting->set_storage_type(main_controller_->GetPlatformSetting()->getFlashToolStorageConfig().GetStorageType());
+
+    if(NORMAL_SCATTER == type)
+        setting->set_is_combo_dl(format_widget->get_is_com_dl());
+    else if(SCI_SCATTER == type)
+        setting->set_is_combo_dl(sciDownload_widget_->IsComboSCI());
+
+    return setting;
+}
+
