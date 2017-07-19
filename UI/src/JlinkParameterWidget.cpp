@@ -386,10 +386,32 @@ void JlinkParameterWidget::setAddressChanged(qint64 address)
 
 	};
 
+	unsigned char out = 0;
+
+//	unsigned char in = jlinkParam[int(address)];
+	unsigned char in = hexEdit->dataAt(address, 1)[0];
+
+	if(in >= '0' && in <= '9')  {
+		out=in-'0'; /*return 0....9*/
+	} else if (in >= 'a' && in <= 'z'){
+		out=in-'a'+10;/*return a,b,c,d,e,f*/
+	} else if (in >= 'A' && in <= 'Z'){
+		out=in-'A'+10+26;/*A B,c,D...*/
+	} else {
+		if (in == 0 || in == 0xff){
+			out = 0;
+		} else if (in > 0 && in < '-') { //'-' is reserved for tools to mark as not modify.
+			out = 10+26+26+in-0x1;//start from 1: len: 0x2c,44
+		} else if (in >= 0x80 && in < 0xff){
+			out = 10+26+26+44+in-0x80; //start from 0x80, len: 0x7f,127
+		} else
+			out = 0;
+	}
+
 	//LOGI("########## %s %d ########## %d\n", __func__, __LINE__, address);
 	char buffer[60];
 	if (address < 60 &&  address >= 0) {
-		snprintf(buffer, 60, "hwinfo[%d]: %s", address, info_name[address]);
+		snprintf(buffer, 60, "hwinfo[%lld]: %s | %d", address, info_name[address], out);
 		info_label->setText(buffer);
 	}
 }
