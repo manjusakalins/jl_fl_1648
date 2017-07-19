@@ -25,30 +25,30 @@
 
 
 JlinkParameterWidget::JlinkParameterWidget(QTabWidget *parent, MainWindow *window) :
-    TabWidgetBase(2, tr("&Download"), parent),
-    main_window_(window),
-    ui_(new Ui::JlinkParameterWidget),
-    wm_arg(new WriteFlashMemoryParameter),
+	TabWidgetBase(2, tr("&Download"), parent),
+	main_window_(window),
+	ui_(new Ui::JlinkParameterWidget),
+	wm_arg(new WriteFlashMemoryParameter),
 	header_(new CheckHeader(Qt::Horizontal, this)),
-    proinfo_addr(0)
+	proinfo_addr(0)
 {
-    ui_->setupUi(this);	
+	ui_->setupUi(this);	
 
 	//hexedit init
 	hexedit_hori_layout = new QHBoxLayout();
-    hexEdit = new QHexEdit;
+	hexEdit = new QHexEdit;
 	hexEdit->setMaximumSize(405,80);
 	hexEdit->setMinimumSize(405,80);
 	jlinkParam.fill('0', 20);
 	hexEdit->setData(jlinkParam);
 	connect(hexEdit, SIGNAL(overwriteModeChanged(bool)), this, SLOT(setOverwriteMode(bool)));
-    connect(hexEdit, SIGNAL(dataChanged()), this, SLOT(dataChanged()));
+	connect(hexEdit, SIGNAL(dataChanged()), this, SLOT(dataChanged()));
 	connect(hexEdit, SIGNAL(currentAddressChanged(qint64)), this, SLOT(setAddressChanged(qint64)));
 	hexedit_hori_layout->addWidget(hexEdit);
 	info_label = new QLabel(tr("hwinfo[0]: Project"));
 	info_label->setMinimumSize(350,80);
 	info_label->setMaximumSize(350,80);
-	
+
 	info_label->setAlignment(Qt::AlignTop|Qt::AlignLeft);
 	info_label->show();
 	hexedit_hori_layout->addWidget(info_label);
@@ -58,7 +58,7 @@ JlinkParameterWidget::JlinkParameterWidget(QTabWidget *parent, MainWindow *windo
 	ui_->horizontalLayout->addItem(horizontalSpacer_2);
 
 	//start for format widget:
-	#if 0
+#if 0
 	jlinkFormatTableWidget = new QTableWidget();
 	if (jlinkFormatTableWidget->columnCount() < 6)
 		jlinkFormatTableWidget->setColumnCount(6);
@@ -127,8 +127,8 @@ JlinkParameterWidget::JlinkParameterWidget(QTabWidget *parent, MainWindow *windo
 	//jlinkFormatTableWidget->setColumnHidden(columnRegion, true);
 
 
-    main_window_->main_controller()->GetPlatformSetting()->addObserver(this);
-    main_window_->scatter_observer()->addObserver(this);
+	main_window_->main_controller()->GetPlatformSetting()->addObserver(this);
+	main_window_->scatter_observer()->addObserver(this);
 	connect(main_window_->get_DLWidget(), SIGNAL(signal_load_finished()),this, SLOT(slot_OnLoadByScatterEnd_JlinkFormat()));
 	//for headr all check or not checked:
 	connect(header_,SIGNAL(sectionClicked(int)), this, SLOT(slot_OnHeaderView_click_jlink_format(int)));
@@ -136,10 +136,10 @@ JlinkParameterWidget::JlinkParameterWidget(QTabWidget *parent, MainWindow *windo
 
 JlinkParameterWidget::~JlinkParameterWidget()
 {
-    //IniItem item("history.ini", "RecentOpenFile", "scatterHistory");
-    //item.SaveStringListValue(scatterFile_historyList_);
+	//IniItem item("history.ini", "RecentOpenFile", "scatterHistory");
+	//item.SaveStringListValue(scatterFile_historyList_);
 
-    delete ui_;
+	delete ui_;
 	delete jlinkFormatTableWidget;
 	delete info_label;
 	delete hexEdit;
@@ -151,20 +151,20 @@ JlinkParameterWidget::~JlinkParameterWidget()
 //============base ui====================
 void JlinkParameterWidget::LockOnUI()
 {
-//    ui_->groupBox->setEnabled(false);
-    ui_->pushButton_ReadParam->setEnabled(false);
+	//    ui_->groupBox->setEnabled(false);
+	ui_->pushButton_ReadParam->setEnabled(false);
 	ui_->pushButton_WriteParam->setEnabled(false);
-    ui_->pushButton_stop->setEnabled(true);
+	ui_->pushButton_stop->setEnabled(true);
 	ui_->toolButton_Format->setEnabled(false);
 }
 
 void JlinkParameterWidget::DoFinished()
 {
 	jlinkParamReadBinData();
-    ui_->pushButton_ReadParam->setEnabled(true);
+	ui_->pushButton_ReadParam->setEnabled(true);
 	ui_->pushButton_WriteParam->setEnabled(true);
 	ui_->toolButton_Format->setEnabled(true);
-    ui_->pushButton_stop->setEnabled(false);
+	ui_->pushButton_stop->setEnabled(false);
 
 }
 
@@ -173,8 +173,8 @@ void JlinkParameterWidget::UpdateUI()
 }
 void JlinkParameterWidget::SetTabLabel(QTabWidget *tab_widget, int index)
 {
-    QString label = tr("Parameter");
-    tab_widget->setTabText(index, label);
+	QString label = tr("Parameter");
+	tab_widget->setTabText(index, label);
 }
 void JlinkParameterWidget::SetShortCut(int cmd, const QString &shortcut)
 {
@@ -183,7 +183,7 @@ void JlinkParameterWidget::SetShortCut(int cmd, const QString &shortcut)
 
 void JlinkParameterWidget::onPlatformChanged()
 {
-    storage_ = main_window_->main_controller()->GetPlatformSetting()->getFlashToolStorageConfig().GetStorageType();
+	storage_ = main_window_->main_controller()->GetPlatformSetting()->getFlashToolStorageConfig().GetStorageType();
 }
 
 void JlinkParameterWidget::OnScatterChanged(bool showRegion)
@@ -217,15 +217,15 @@ int JlinkParameterWidget::ArgFlashToolWriteMemory(int n, WriteFlashMemoryParamet
 
 QSharedPointer<APCore::WriteMemorySetting> JlinkParameterWidget::CreateJlinkParamWriteMemSetting()
 {
-    QSharedPointer<APCore::WriteMemorySetting> setting(new APCore::WriteMemorySetting());
+	QSharedPointer<APCore::WriteMemorySetting> setting(new APCore::WriteMemorySetting());
 
-    setting->set_address(proinfo_addr);
-    setting->set_input_mode(InputMode_FromFile);
-    setting->set_input(std::string(JP_FILE_NAME));
-    setting->set_input_length(JP_FILE_LEN);
+	setting->set_address(proinfo_addr);
+	setting->set_input_mode(InputMode_FromFile);
+	setting->set_input(std::string(JP_FILE_NAME));
+	setting->set_input_length(JP_FILE_LEN);
 	setting->set_part_id(EMMC_PART_USER);
 
-    return setting;
+	return setting;
 }
 
 void JlinkParameterWidget::on_pushButton_WriteParam_clicked()
@@ -241,7 +241,7 @@ void JlinkParameterWidget::on_pushButton_WriteParam_clicked()
 		main_window_->main_controller()->SetConnSetting(main_window_->CreateConnSetting());
 		main_window_->main_controller()->QueueAJob(main_window_->CreateJlinkParamWriteMemorySetting());
 		if(!ToolInfo::IsCustomerVer())
-		    main_window_->main_controller()->QueueAJob(main_window_->CreateWatchDogSetting());
+			main_window_->main_controller()->QueueAJob(main_window_->CreateWatchDogSetting());
 		main_window_->main_controller()->StartExecuting(new SimpleCallback<MainWindow>(main_window_,&MainWindow::DoFinished));
 		main_window_->LockOnUI();
 		main_window_->GetOkDialog()->setWindowTitle(LoadQString(LANGUAGE_TAG,IDS_STRING_WRITE_MEMORY_OK));
@@ -269,7 +269,7 @@ ReadbackItem JlinkParameterWidget::GetJlinkParamRBItem()
 	{
 		LOGI("########## %s %d ########## %s\n", __func__, __LINE__, it->name.c_str());
 		if( 0 == it->name.compare(std::string(JP_PART_NAME))||
-			0 == it->name.compare(std::string(JP_PART_NAME1))){
+				0 == it->name.compare(std::string(JP_PART_NAME1))){
 			addr = it->begin_addr;
 			proinfo_addr = addr;
 			break;
@@ -296,7 +296,7 @@ void JlinkParameterWidget::on_pushButton_ReadParam_clicked()
 		main_window_->main_controller()->SetConnSetting(main_window_->CreateConnSetting());
 		main_window_->main_controller()->QueueAJob(main_window_->CreateJlinkParamReadbackSetting());
 		main_window_->main_controller()->StartExecuting(
-		new SimpleCallback<MainWindow>(main_window_,&MainWindow::DoFinished));
+				new SimpleCallback<MainWindow>(main_window_,&MainWindow::DoFinished));
 		main_window_->LockOnUI();
 		main_window_->GetOkDialog()->setWindowTitle(LoadQString(main_window_->GetLanguageTag(), IDS_STRING_READ_BACK_OK));
 	}
@@ -304,21 +304,21 @@ void JlinkParameterWidget::on_pushButton_ReadParam_clicked()
 void JlinkParameterWidget::dataChanged()
 {
 	LOGI("########## %s %d ########## 0x%x 0x%x\n", __func__, __LINE__, jlinkParam.at(0), hexEdit->dataAt(0,1).at(0));
-	
+
 	//LOGI("########## %s %d ########## size: %d %d \n", __func__, __LINE__, info_label->minimumSizeHint().width(), info_label->minimumSizeHint().height());
-	#if 0
+#if 0
 	QBuffer tmpbuffer;
 	tmpbuffer.setBuffer(&jlinkParam);
 	hexEdit->write(tmpbuffer);
 	LOGI("########## %s %d ########## %d %d\n", __func__, __LINE__, jlinkParam.at(0), hexEdit->dataAt(0,1).at(0));
-    //setWindowModified(hexEdit->isModified());
-	#endif
+	//setWindowModified(hexEdit->isModified());
+#endif
 }
 
 void JlinkParameterWidget::setOverwriteMode(bool mode)
 {
 	LOGI("########## %s %d ########## %d\n", __func__, __LINE__, mode);
-	
+
 }
 void JlinkParameterWidget::setAddressChanged(qint64 address)
 {
@@ -386,66 +386,66 @@ void JlinkParameterWidget::jlinkParamWriteBinData(void)
 
 void JlinkParameterWidget::SetRomAddress(int row, int column, U64 address)
 {
-    QTableWidgetItem *tableItem = jlinkFormatTableWidget->item(row, column);
-    if (tableItem == NULL) {
-        tableItem = new QTableWidgetItem();
-        jlinkFormatTableWidget->setItem(row, column,tableItem);
-    }
-    tableItem->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
-    tableItem->setText(QString("0x%1").arg(address,16,16,QChar('0')));
+	QTableWidgetItem *tableItem = jlinkFormatTableWidget->item(row, column);
+	if (tableItem == NULL) {
+		tableItem = new QTableWidgetItem();
+		jlinkFormatTableWidget->setItem(row, column,tableItem);
+	}
+	tableItem->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+	tableItem->setText(QString("0x%1").arg(address,16,16,QChar('0')));
 }
 void JlinkParameterWidget::slot_OnLoadByScatterEnd_JlinkFormat()
 {
 	LOGI("########## %s %d ##########\n", __func__, __LINE__);
 	std::list<ImageInfo> image_list;
-    QTableWidgetItem * tableItem;
+	QTableWidgetItem * tableItem;
 	int row_count = 0;
-    int row = 0;
+	int row = 0;
 	main_window_->main_controller()->GetImageInfoList(image_list, DOWNLOAD_ONLY);
-    for(std::list<ImageInfo>::const_iterator it = image_list.begin(); it != image_list.end(); ++it) {
+	for(std::list<ImageInfo>::const_iterator it = image_list.begin(); it != image_list.end(); ++it) {
 		//U64 len = it->end_addr - it->begin_addr;
 		//LOGI("########## %s %d ########## %s: %llx: %llx %llx, %llx\n", __func__, __LINE__, it->name.c_str(), it->region_addr, it->begin_addr, it->end_addr, len);
 		row_count++;
-    }
+	}
 	jlinkFormatTableWidget->setRowCount(row_count);
 
 	row_count=0;
-    for(std::list<ImageInfo>::const_iterator it = image_list.begin(); it != image_list.end(); ++it) {
+	for(std::list<ImageInfo>::const_iterator it = image_list.begin(); it != image_list.end(); ++it) {
 		SetRomAddress(row, ColumnBeginAddr, it->begin_addr);
 		SetRomAddress(row, ColumnEndAddr, it->end_addr);
 
-        tableItem = jlinkFormatTableWidget->item(row, columnRegion);
-        if(tableItem == NULL){
-            tableItem = new QTableWidgetItem();
-            jlinkFormatTableWidget->setItem(row, columnRegion, tableItem);
-        }
-        tableItem->setText(QString::number(it->region));
+		tableItem = jlinkFormatTableWidget->item(row, columnRegion);
+		if(tableItem == NULL){
+			tableItem = new QTableWidgetItem();
+			jlinkFormatTableWidget->setItem(row, columnRegion, tableItem);
+		}
+		tableItem->setText(QString::number(it->region));
 #if 1
-        tableItem = jlinkFormatTableWidget->item(row, ColumnLocation);
-        if (tableItem == NULL) {
-            tableItem = new QTableWidgetItem();
-            jlinkFormatTableWidget->setItem(row, ColumnLocation,tableItem);
-        }
+		tableItem = jlinkFormatTableWidget->item(row, ColumnLocation);
+		if (tableItem == NULL) {
+			tableItem = new QTableWidgetItem();
+			jlinkFormatTableWidget->setItem(row, ColumnLocation,tableItem);
+		}
 		char buffer[20];
 		snprintf(buffer,20,"mmcblk0:p%d", row-1);
-        tableItem->setText(QString::fromLocal8Bit(buffer));
+		tableItem->setText(QString::fromLocal8Bit(buffer));
 #endif
-        tableItem = jlinkFormatTableWidget->item(row, ColumnName);
-        if (tableItem == NULL) {
-            tableItem = new QTableWidgetItem();
-            jlinkFormatTableWidget->setItem(row, ColumnName, tableItem);
-        }
-        tableItem->setText(it->name.c_str());
+		tableItem = jlinkFormatTableWidget->item(row, ColumnName);
+		if (tableItem == NULL) {
+			tableItem = new QTableWidgetItem();
+			jlinkFormatTableWidget->setItem(row, ColumnName, tableItem);
+		}
+		tableItem->setText(it->name.c_str());
 
-        tableItem = jlinkFormatTableWidget->item(row, ColumnEnable);
-        if (tableItem == NULL) {
-            tableItem = new QTableWidgetItem();
-            jlinkFormatTableWidget->setItem(row, ColumnEnable, tableItem);
-        }
+		tableItem = jlinkFormatTableWidget->item(row, ColumnEnable);
+		if (tableItem == NULL) {
+			tableItem = new QTableWidgetItem();
+			jlinkFormatTableWidget->setItem(row, ColumnEnable, tableItem);
+		}
 		//tableItem->setCheckState(Qt::Checked);
 		tableItem->setCheckState(Qt::Unchecked);
 
-        row++;
+		row++;
 	}
 }
 
@@ -454,12 +454,12 @@ void JlinkParameterWidget::slot_OnHeaderView_click_jlink_format(int index)
 	//LOGI("########## %s %d ########## %d\n", __func__, __LINE__, index);
 	if (index == 0) {
 		bool checked = header_->GetChecked();
-	    QTableWidgetItem * tableItem;
+		QTableWidgetItem * tableItem;
 		std::list<ImageInfo> image_list;
 		main_window_->main_controller()->GetImageInfoList(image_list, DOWNLOAD_ONLY);
 		int row=0;
-	    for(std::list<ImageInfo>::const_iterator it = image_list.begin(); it != image_list.end(); ++it) {
-	        tableItem = jlinkFormatTableWidget->item(row, ColumnEnable);
+		for(std::list<ImageInfo>::const_iterator it = image_list.begin(); it != image_list.end(); ++it) {
+			tableItem = jlinkFormatTableWidget->item(row, ColumnEnable);
 			tableItem->setCheckState(checked?Qt::Checked:Qt::Unchecked);
 			row++;
 		}
@@ -469,16 +469,16 @@ void JlinkParameterWidget::slot_OnHeaderView_click_jlink_format(int index)
 void JlinkParameterWidget::on_toolButton_Format_clicked()
 {
 	LOGI("########## %s %d ##########\n", __func__, __LINE__);
-    if(1)
-    {
-        main_window_->main_controller()->SetPlatformSetting();
-        main_window_->main_controller()->SetConnSetting(main_window_->CreateConnSetting());
-        main_window_->main_controller()->QueueAJob(main_window_->CreateJlinkComboCustFormatSetting());
-        main_window_->main_controller()->StartExecuting(
-                    new SimpleCallback<MainWindow>(main_window_,&MainWindow::DoFinished));
-        main_window_->LockOnUI();
-        main_window_->GetOkDialog()->setWindowTitle(LoadQString(LANGUAGE_TAG, IDS_STRING_FORMAT_OK));
-    }
+	if(1)
+	{
+		main_window_->main_controller()->SetPlatformSetting();
+		main_window_->main_controller()->SetConnSetting(main_window_->CreateConnSetting());
+		main_window_->main_controller()->QueueAJob(main_window_->CreateJlinkComboCustFormatSetting());
+		main_window_->main_controller()->StartExecuting(
+				new SimpleCallback<MainWindow>(main_window_,&MainWindow::DoFinished));
+		main_window_->LockOnUI();
+		main_window_->GetOkDialog()->setWindowTitle(LoadQString(LANGUAGE_TAG, IDS_STRING_FORMAT_OK));
+	}
 }
 
 void JlinkParameterWidget::SetFormatSettingList(QSharedPointer<APCore::JlinkComboCustFormatSetting> &jlink_combo_format_setting)
@@ -493,12 +493,12 @@ void JlinkParameterWidget::SetFormatSettingList(QSharedPointer<APCore::JlinkComb
 	QTableWidgetItem *pre_tableItem = NULL;
 
 	for(std::list<ImageInfo>::const_iterator it = image_list.begin(); it != image_list.end(); ++it) {
-	    tableItem = jlinkFormatTableWidget->item(row, ColumnEnable);
+		tableItem = jlinkFormatTableWidget->item(row, ColumnEnable);
 		if (pre_tableItem && pre_tableItem->checkState() == Qt::Checked) {
 			APCore::FormatSetting *fmt_setting_ = new APCore::FormatSetting();
 			fmt_setting_->set_part_id(EMMC_PART_USER);
-	        fmt_setting_->set_begin_addr(pre_rom_start_addr);
-	        fmt_setting_->set_length(it->begin_addr-pre_rom_start_addr);
+			fmt_setting_->set_begin_addr(pre_rom_start_addr);
+			fmt_setting_->set_length(it->begin_addr-pre_rom_start_addr);
 			format_list.push_back(fmt_setting_);
 		}
 		pre_rom_start_addr = it->begin_addr;
