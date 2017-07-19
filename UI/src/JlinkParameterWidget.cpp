@@ -37,17 +37,17 @@ JlinkParameterWidget::JlinkParameterWidget(QTabWidget *parent, MainWindow *windo
 	//hexedit init
 	hexedit_hori_layout = new QHBoxLayout();
 	hexEdit = new QHexEdit;
-	hexEdit->setMaximumSize(405,80);
-	hexEdit->setMinimumSize(405,80);
-	jlinkParam.fill('0', 20);
+	hexEdit->setMaximumSize(405,130);
+	hexEdit->setMinimumSize(405,130);
+	jlinkParam.fill('0', 60);
 	hexEdit->setData(jlinkParam);
 	connect(hexEdit, SIGNAL(overwriteModeChanged(bool)), this, SLOT(setOverwriteMode(bool)));
 	connect(hexEdit, SIGNAL(dataChanged()), this, SLOT(dataChanged()));
 	connect(hexEdit, SIGNAL(currentAddressChanged(qint64)), this, SLOT(setAddressChanged(qint64)));
 	hexedit_hori_layout->addWidget(hexEdit);
 	info_label = new QLabel(tr("hwinfo[0]: Project"));
-	info_label->setMinimumSize(350,80);
-	info_label->setMaximumSize(350,80);
+	info_label->setMinimumSize(350,130);
+	info_label->setMaximumSize(350,130);
 
 	info_label->setAlignment(Qt::AlignTop|Qt::AlignLeft);
 	info_label->show();
@@ -189,7 +189,7 @@ void JlinkParameterWidget::onPlatformChanged()
 void JlinkParameterWidget::OnScatterChanged(bool showRegion)
 {
 	//ui_->pushButton_WriteParam->setEnabled(false);
-	jlinkParam.fill('0', 20);
+	jlinkParam.fill('0', 60);
 	hexEdit->setData(jlinkParam);
 }
 
@@ -322,7 +322,7 @@ void JlinkParameterWidget::setOverwriteMode(bool mode)
 }
 void JlinkParameterWidget::setAddressChanged(qint64 address)
 {
-	char *info_name[20] = {
+	char *info_name[60] = {
 		"Project",
 		"HW_ver",
 		"LCD",
@@ -342,12 +342,53 @@ void JlinkParameterWidget::setAddressChanged(qint64 address)
 		"cpu_frequency",
 		"memory_size",
 		"cpu_cores",
-		"cpu platform"
+		"cpu platform",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+		"HW_INFO_udf",
+
 	};
 
 	//LOGI("########## %s %d ########## %d\n", __func__, __LINE__, address);
 	char buffer[60];
-	if (address < 20 &&  address >= 0) {
+	if (address < 60 &&  address >= 0) {
 		snprintf(buffer, 60, "hwinfo[%d]: %s", address, info_name[address]);
 		info_label->setText(buffer);
 	}
@@ -363,7 +404,7 @@ void JlinkParameterWidget::jlinkParamReadBinData(void)
 		return;
 	}
 	binf.seek(0xfc);
-	jlinkParam = binf.read(20);
+	jlinkParam = binf.read(60);
 	hexEdit->setData(jlinkParam);
 	binf.close();
 }
