@@ -23,6 +23,7 @@
 #define JP_PART_NAME ("proinfo")
 #define JP_PART_NAME1 ("PRO_INFO")
 
+JlinkParameterWidget *JlinkParameterWidget::instance_ = NULL;
 
 JlinkParameterWidget::JlinkParameterWidget(QTabWidget *parent, MainWindow *window) :
 	TabWidgetBase(2, tr("&Download"), parent),
@@ -32,7 +33,8 @@ JlinkParameterWidget::JlinkParameterWidget(QTabWidget *parent, MainWindow *windo
 	header_(new CheckHeader(Qt::Horizontal, this)),
 	proinfo_addr(0)
 {
-	ui_->setupUi(this);	
+	ui_->setupUi(this);
+	instance_ = this;
 
 	//hexedit init
 	hexedit_hori_layout = new QHBoxLayout();
@@ -132,6 +134,8 @@ JlinkParameterWidget::JlinkParameterWidget(QTabWidget *parent, MainWindow *windo
 	connect(main_window_->get_DLWidget(), SIGNAL(signal_load_finished()),this, SLOT(slot_OnLoadByScatterEnd_JlinkFormat()));
 	//for headr all check or not checked:
 	connect(header_,SIGNAL(sectionClicked(int)), this, SLOT(slot_OnHeaderView_click_jlink_format(int)));
+	connect(this, SIGNAL(signal_WriteMemoryInit()),	SLOT(slot_WriteMemoryInit_jlink()));
+
 }
 
 JlinkParameterWidget::~JlinkParameterWidget()
@@ -154,6 +158,7 @@ void JlinkParameterWidget::LockOnUI()
 	//    ui_->groupBox->setEnabled(false);
 	ui_->pushButton_ReadParam->setEnabled(false);
 	ui_->pushButton_WriteParam->setEnabled(false);
+	ui_->pushButton_BatUpdate->setEnabled(false);
 	ui_->pushButton_stop->setEnabled(true);
 	ui_->toolButton_Format->setEnabled(false);
 }
@@ -163,6 +168,7 @@ void JlinkParameterWidget::DoFinished()
 	jlinkParamReadBinData();
 	ui_->pushButton_ReadParam->setEnabled(true);
 	ui_->pushButton_WriteParam->setEnabled(true);
+	ui_->pushButton_BatUpdate->setEnabled(true);
 	ui_->toolButton_Format->setEnabled(true);
 	ui_->pushButton_stop->setEnabled(false);
 
@@ -248,7 +254,26 @@ void JlinkParameterWidget::on_pushButton_WriteParam_clicked()
 	}
 }
 
+void JlinkParameterWidget::on_pushButton_BatUpdate_clicked()
+{
+	QBuffer tmpbuffer;
+	tmpbuffer.setBuffer(&jlinkParam);
+	hexEdit->write(tmpbuffer);
+	LOGI("########## %s %d ########## 0x%x 0x%x\n", __func__, __LINE__, jlinkParam.at(0), hexEdit->dataAt(0,1).at(0));
+	jlinkParamWriteBinData();
 
+	if (main_window_->IsScatterFileLoad()) {
+		main_window_->main_controller()->SetPlatformSetting();
+		main_window_->main_controller()->SetConnSetting(main_window_->CreateConnSetting());
+		main_window_->main_controller()->QueueAJob(main_window_->CreateJlinkParamWriteMemorySetting());
+		main_window_->main_controller()->QueueAJob(main_window_->CreateJlinkParamReadbackSetting());
+		if(!ToolInfo::IsCustomerVer())
+			main_window_->main_controller()->QueueAJob(main_window_->CreateWatchDogSetting());
+		main_window_->main_controller()->StartExecuting(new SimpleCallback<MainWindow>(main_window_,&MainWindow::DoFinished));
+		main_window_->LockOnUI();
+		main_window_->GetOkDialog()->setWindowTitle(LoadQString(LANGUAGE_TAG,IDS_STRING_WRITE_MEMORY_OK));
+	}
+}
 
 
 void JlinkParameterWidget::on_pushButton_stop_clicked()
@@ -457,6 +482,11 @@ void JlinkParameterWidget::SetRomAddress(int row, int column, U64 address)
 	tableItem->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 	tableItem->setText(QString("0x%1").arg(address,16,16,QChar('0')));
 }
+void JlinkParameterWidget::slot_WriteMemoryInit_jlink()
+{
+	LOGI("########## %s %d ##########\n", __func__, __LINE__);
+
+}
 void JlinkParameterWidget::slot_OnLoadByScatterEnd_JlinkFormat()
 {
 	LOGI("########## %s %d ##########\n", __func__, __LINE__);
@@ -573,3 +603,8 @@ void JlinkParameterWidget::SetFormatSettingList(QSharedPointer<APCore::JlinkComb
 
 }
 
+void __stdcall JlinkParameterWidget::jlink_WriteMemoryInit()
+{
+
+    emit instance_->signal_WriteMemoryInit();
+}

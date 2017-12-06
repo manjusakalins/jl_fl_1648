@@ -60,6 +60,8 @@ public:
     void SetReadbackListItem(QSharedPointer<APCore::ReadbackSetting> &readback_setting);//for mainwindow to call init args
     void SetFormatSettingList(QSharedPointer<APCore::JlinkComboCustFormatSetting> &jlink_combo_format_setting);
     QSharedPointer<APCore::WriteMemorySetting> CreateJlinkParamWriteMemSetting();//for mainwindow to call init args
+
+    static void __stdcall jlink_WriteMemoryInit();
 private:
     HW_StorageType_E storage_;
     bool platform_changed_;
@@ -78,17 +80,21 @@ private:
     void SetRomAddress(int row, int column, U64 address);
     WriteFlashMemoryParameter *wm_arg;
 
+    static JlinkParameterWidget *instance_;
+
 protected:
 
 
 signals:
 
+    void signal_WriteMemoryInit();
 
 public slots:
 
 private slots:
 
     void on_pushButton_WriteParam_clicked();    
+    void on_pushButton_BatUpdate_clicked();
     void on_pushButton_ReadParam_clicked();
     void on_toolButton_Format_clicked();
     void on_pushButton_stop_clicked();
@@ -97,7 +103,7 @@ private slots:
     void setAddressChanged(qint64 address);//for hexedit.
     void slot_OnLoadByScatterEnd_JlinkFormat();
     void slot_OnHeaderView_click_jlink_format(int index);
-
+    void slot_WriteMemoryInit_jlink(void);
 };
 
 #endif // JLINKPARAMETERWIDGET_H
