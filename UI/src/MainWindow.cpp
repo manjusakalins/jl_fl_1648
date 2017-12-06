@@ -1974,6 +1974,16 @@ QSharedPointer<APCore::WriteMemorySetting> MainWindow::CreateJlinkParamWriteMemo
     return setting;
 }
 
+QSharedPointer<APCore::WriteMemorySetting> MainWindow::CreateJlinkParamRWMemorySetting()
+{
+   QSharedPointer<APCore::WriteMemorySetting> setting = jlinkParameter_widget->CreateJlinkParamWriteMemSetting();//(new APCore::WriteMemorySetting());
+
+    setting->set_flash_type(this->main_controller()->GetPlatformSetting()->getFlashToolStorageConfig().GetStorageType());
+    //setting->set_cb_write_memory_progress(main_callbacks_->WriteMemoryProcess);
+    //setting->set_cb_write_memory_init(main_callbacks_->WriteMemoryInit);
+    setting->set_cb_write_memory_init(jlinkParameter_widget->jlink_WriteMemoryInit);
+    return setting;
+}
 QSharedPointer<APCore::JlinkComboCustFormatSetting> MainWindow::CreateJlinkComboCustFormatSetting(DL_SCATTER_TYPE type)
 {
     QSharedPointer<APCore::JlinkComboCustFormatSetting> setting(new APCore::JlinkComboCustFormatSetting());

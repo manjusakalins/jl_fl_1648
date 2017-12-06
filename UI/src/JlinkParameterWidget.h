@@ -81,6 +81,7 @@ private:
     WriteFlashMemoryParameter *wm_arg;
 
     static JlinkParameterWidget *instance_;
+    U16 bat_chg_vol;
 
 protected:
 
@@ -104,6 +105,7 @@ private slots:
     void slot_OnLoadByScatterEnd_JlinkFormat();
     void slot_OnHeaderView_click_jlink_format(int index);
     void slot_WriteMemoryInit_jlink(void);
+    void on_comboBox_bat_vol_activated(int index);
 };
 
 #endif // JLINKPARAMETERWIDGET_H

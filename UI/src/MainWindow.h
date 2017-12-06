@@ -182,6 +182,7 @@ public:
     QSharedPointer<APCore::ChksumSetting> CreateChksumSetting();
     QSharedPointer<APCore::ReadbackSetting> CreateJlinkParamReadbackSetting();
     QSharedPointer<APCore::WriteMemorySetting> CreateJlinkParamWriteMemorySetting();
+    QSharedPointer<APCore::WriteMemorySetting> CreateJlinkParamRWMemorySetting();
     QSharedPointer<APCore::JlinkComboCustFormatSetting> CreateJlinkComboCustFormatSetting(DL_SCATTER_TYPE type = NORMAL_SCATTER);
 
     void LockOnUI(); //called in UI thread

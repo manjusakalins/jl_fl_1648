@@ -23,6 +23,25 @@
 #define JP_PART_NAME ("proinfo")
 #define JP_PART_NAME1 ("PRO_INFO")
 
+typedef enum{
+    BAT_CHG_VOL_420 = 0,
+    BAT_CHG_VOL_435,
+    BAT_CHG_VOL_430,
+}BAT_VOL;
+struct jlink_battery_hwinfo_para {
+	U16 g_jlink_zcv_func_control; //1
+	U16 car_tune_value;
+	U16 chg_cv_vol;
+	U16 chg_end_cur;
+	U16 chg_num_bat;//5
+	U16 dis_t_cur;//6
+	U16 dis_t_clumb;
+	U16 dis_real_bl;
+	U16 reserved1;
+	U16 dis_record_idx;
+};
+
+
 JlinkParameterWidget *JlinkParameterWidget::instance_ = NULL;
 
 JlinkParameterWidget::JlinkParameterWidget(QTabWidget *parent, MainWindow *window) :
@@ -36,11 +55,12 @@ JlinkParameterWidget::JlinkParameterWidget(QTabWidget *parent, MainWindow *windo
 	ui_->setupUi(this);
 	instance_ = this;
 
+#define HEXEDIT_SIZE (150)
 	//hexedit init
 	hexedit_hori_layout = new QHBoxLayout();
 	hexEdit = new QHexEdit;
-	hexEdit->setMaximumSize(405,130);
-	hexEdit->setMinimumSize(405,130);
+	hexEdit->setMaximumSize(405+HEXEDIT_SIZE,130);
+	hexEdit->setMinimumSize(405+HEXEDIT_SIZE,130);
 	jlinkParam.fill('0', 60);
 	hexEdit->setData(jlinkParam);
 	connect(hexEdit, SIGNAL(overwriteModeChanged(bool)), this, SLOT(setOverwriteMode(bool)));
@@ -48,8 +68,8 @@ JlinkParameterWidget::JlinkParameterWidget(QTabWidget *parent, MainWindow *windo
 	connect(hexEdit, SIGNAL(currentAddressChanged(qint64)), this, SLOT(setAddressChanged(qint64)));
 	hexedit_hori_layout->addWidget(hexEdit);
 	info_label = new QLabel(tr("hwinfo[0]: Project"));
-	info_label->setMinimumSize(350,130);
-	info_label->setMaximumSize(350,130);
+	info_label->setMinimumSize(450+HEXEDIT_SIZE,130);
+	info_label->setMaximumSize(450+HEXEDIT_SIZE,130);
 
 	info_label->setAlignment(Qt::AlignTop|Qt::AlignLeft);
 	info_label->show();
@@ -135,6 +155,14 @@ JlinkParameterWidget::JlinkParameterWidget(QTabWidget *parent, MainWindow *windo
 	//for headr all check or not checked:
 	connect(header_,SIGNAL(sectionClicked(int)), this, SLOT(slot_OnHeaderView_click_jlink_format(int)));
 	connect(this, SIGNAL(signal_WriteMemoryInit()),	SLOT(slot_WriteMemoryInit_jlink()));
+
+	//bat
+	QStringList sceneList;
+	sceneList << QObject::tr("4.20v")
+		<< QObject::tr("4.35v");
+	ui_->comboBox_bat_vol->addItems(sceneList);
+	ui_->comboBox_bat_vol->setCurrentIndex(0);
+	bat_chg_vol = 420;
 
 }
 
@@ -260,13 +288,12 @@ void JlinkParameterWidget::on_pushButton_BatUpdate_clicked()
 	tmpbuffer.setBuffer(&jlinkParam);
 	hexEdit->write(tmpbuffer);
 	LOGI("########## %s %d ########## 0x%x 0x%x\n", __func__, __LINE__, jlinkParam.at(0), hexEdit->dataAt(0,1).at(0));
-	jlinkParamWriteBinData();
 
 	if (main_window_->IsScatterFileLoad()) {
 		main_window_->main_controller()->SetPlatformSetting();
 		main_window_->main_controller()->SetConnSetting(main_window_->CreateConnSetting());
-		main_window_->main_controller()->QueueAJob(main_window_->CreateJlinkParamWriteMemorySetting());
 		main_window_->main_controller()->QueueAJob(main_window_->CreateJlinkParamReadbackSetting());
+		main_window_->main_controller()->QueueAJob(main_window_->CreateJlinkParamRWMemorySetting());
 		if(!ToolInfo::IsCustomerVer())
 			main_window_->main_controller()->QueueAJob(main_window_->CreateWatchDogSetting());
 		main_window_->main_controller()->StartExecuting(new SimpleCallback<MainWindow>(main_window_,&MainWindow::DoFinished));
@@ -482,11 +509,7 @@ void JlinkParameterWidget::SetRomAddress(int row, int column, U64 address)
 	tableItem->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 	tableItem->setText(QString("0x%1").arg(address,16,16,QChar('0')));
 }
-void JlinkParameterWidget::slot_WriteMemoryInit_jlink()
-{
-	LOGI("########## %s %d ##########\n", __func__, __LINE__);
 
-}
 void JlinkParameterWidget::slot_OnLoadByScatterEnd_JlinkFormat()
 {
 	LOGI("########## %s %d ##########\n", __func__, __LINE__);
@@ -608,3 +631,49 @@ void __stdcall JlinkParameterWidget::jlink_WriteMemoryInit()
 
     emit instance_->signal_WriteMemoryInit();
 }
+void JlinkParameterWidget::slot_WriteMemoryInit_jlink()
+{
+	LOGI("########## %s %d ##########%d\n", __func__, __LINE__, bat_chg_vol);
+		QFile binf;
+	struct jlink_battery_hwinfo_para *jlink_bat;
+	QString bat_cap = ui_->lineEdit_bat_cap->text();
+	U16 cap=bat_cap.toInt()/50;
+	jlink_bat = (struct jlink_battery_hwinfo_para *)jlinkParam.data();
+	jlink_bat->g_jlink_zcv_func_control = 0x5fe;
+	jlink_bat->chg_cv_vol = bat_chg_vol;
+	jlink_bat->dis_record_idx = 0;
+	jlink_bat->dis_t_clumb = cap;
+
+	QString dump(jlinkParam.toHex());
+	LOGI("########## %s %d ########## to write:%s\n", __func__, __LINE__, dump.toStdString().c_str());
+
+	binf.setFileName(JP_FILE_NAME);
+	bool ok = binf.open(QIODevice::ReadWrite);
+	if (!ok) {
+		LOGI("########## %s %d ########## write bin file %d\n", __func__, __LINE__, ok);
+		return;
+	}
+	binf.seek(0xfc);
+	binf.write(jlinkParam);
+	binf.close();
+
+}
+void JlinkParameterWidget::on_comboBox_bat_vol_activated(int index)
+{
+	switch(index)
+	{
+		case 0:
+			bat_chg_vol = 420;
+			break;
+
+		case 1:
+			bat_chg_vol = 435;
+			break;
+
+		case 2:
+			bat_chg_vol = 430;
+			break;
+	}
+	LOGI("########## %s %d ##########%d\n", __func__, __LINE__, bat_chg_vol);
+}
+
