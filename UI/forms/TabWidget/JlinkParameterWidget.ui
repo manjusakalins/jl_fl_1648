@@ -46,7 +46,7 @@ margin:0 0 0 0;</string>
       <widget class="QLineEdit" name="lineEdit_bat_cap">
        <property name="minimumSize">
         <size>
-         <width>100</width>
+         <width>110</width>
          <height>0</height>
         </size>
        </property>
@@ -60,7 +60,33 @@ margin:0 0 0 0;</string>
         <string/>
        </property>
        <property name="placeholderText">
-        <string>bat capacity</string>
+        <string>cap_mah</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>current:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lineEdit_bat_cur">
+       <property name="minimumSize">
+        <size>
+         <width>110</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>110</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="placeholderText">
+        <string>ma def:500</string>
        </property>
       </widget>
      </item>

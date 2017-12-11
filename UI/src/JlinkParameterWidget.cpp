@@ -633,16 +633,30 @@ void __stdcall JlinkParameterWidget::jlink_WriteMemoryInit()
 }
 void JlinkParameterWidget::slot_WriteMemoryInit_jlink()
 {
+
 	LOGI("########## %s %d ##########%d\n", __func__, __LINE__, bat_chg_vol);
-		QFile binf;
+	QFile binf;
 	struct jlink_battery_hwinfo_para *jlink_bat;
+	jlinkParamReadBinData();
+	QString bdump(jlinkParam.toHex());
+	LOGI("########## %s %d ########## rd  back:%s\n", __func__, __LINE__, bdump.toStdString().c_str());
+
 	QString bat_cap = ui_->lineEdit_bat_cap->text();
 	U16 cap=bat_cap.toInt()/50;
+	if (cap < 2)
+		cap = 50;
+
+	QString bat_cur = ui_->lineEdit_bat_cur->text();
+	U16 cur=bat_cur.toInt();
+	if (cur < 200)
+		cur = 500;
+
 	jlink_bat = (struct jlink_battery_hwinfo_para *)jlinkParam.data();
 	jlink_bat->g_jlink_zcv_func_control = 0x5fe;
 	jlink_bat->chg_cv_vol = bat_chg_vol;
 	jlink_bat->dis_record_idx = 0;
 	jlink_bat->dis_t_clumb = cap;
+	jlink_bat->dis_t_cur = cur;
 
 	QString dump(jlinkParam.toHex());
 	LOGI("########## %s %d ########## to write:%s\n", __func__, __LINE__, dump.toStdString().c_str());
